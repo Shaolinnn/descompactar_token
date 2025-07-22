@@ -7,15 +7,18 @@ export default function handler(req, res) {
 
   const { compressedToken } = req.body;
   if (!compressedToken) {
-    return res.status(400).json({ error: 'Token missing' });
+    return res.status(400).json({ error: 'compressedToken missing' });
   }
 
   try {
     const base64 = decodeURIComponent(compressedToken)
       .replace(/-/g, '+')
-      .replace(/_/g, '/');
+      .replace(/_/g, '/')
+      .replace(/%2B/g, '+')
+      .replace(/%2F/g, '/');
 
     const buffer = Buffer.from(base64, 'base64');
+
     zlib.gunzip(buffer, (err, decoded) => {
       if (err) {
         return res.status(500).json({ error: 'Decompression failed', details: err.message });
